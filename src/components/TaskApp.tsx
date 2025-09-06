@@ -19,33 +19,81 @@ export default function TaskApp() {
   const [editingTitle, setEditingTitle] = useState<string>("");
 
 
-  function addTask() {
-    // 2. Add a new task to the array
-    if (newTask) {
-        const newTaskObj: Task = {
-            id: crypto.randomUUID(),
-            title: newTask,
-            completed: false,
-        };
-        setTasks([...tasks, newTaskObj]);
-        setNewTask("")
+  async function addTask() {
+    const title = newTask.trim();
+    if (!title) return;
+
+    // 1) insert into DB and return the row we created
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert({ title, completed: false })
+      .select()
+      .single();
+
+    // 2) handle error
+    if (error) {
+      console.error('Failed to insert task:', error);
+      return;
     }
+
+    // 3) update local state with the row returned by Supabase
+    setTasks([...tasks, data as Task]);
+    setNewTask('');
   }
 
-  function toggleTask(id: string) {
-    const updated = tasks.map((task) => {{
-        if (task.id === id) {
-            return { ...task, completed: !task.completed };
-        } else {
-            return task;
-        }
-    }});
-    setTasks(updated);
+  async function toggleTask(id: string) {
+    // 1) Find the task we’re toggling
+    const target = tasks.find((t) => t.id === id);
+    if (!target) return;
+
+    // 2) Compute the new completed value
+    const nextCompleted = !target.completed;
+
+    // 3) Optimistically update local UI
+    const prevTasks = tasks;
+    const optimistic = tasks.map((t) =>
+      t.id === id ? { ...t, completed: nextCompleted } : t
+    );
+    setTasks(optimistic);
+
+    // 4) Persist to Supabase
+    const { data, error } = await supabase
+      .from('tasks')
+      .update({ completed: nextCompleted })
+      .eq('id', id)
+      .select()
+      .single();
+
+    // 5) Handle errors (rollback UI if needed)
+    if (error) {
+      console.error('Failed to toggle task:', error);
+      setTasks(prevTasks); // rollback
+      return;
+    }
+
+    // 6) (Optional) trust server as source of truth
+    setTasks((cur) => cur.map((t) => (t.id === id ? (data as Task) : t)));
   }
 
-  function deleteTask(id: string) {
-    const remaining = tasks.filter((task) => task.id !== id );
-    setTasks(remaining);
+  async function deleteTask(id: string) {
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Failed to delete task:', error);
+      return;
+    }
+
+    // remove locally after DB confirms delete
+    setTasks(tasks.filter((t) => t.id !== id));
+
+    // if you were editing this one, exit edit mode
+    if (editingId === id) {
+      setEditingId(null);
+      setEditingTitle("");
+    }
   }
   
   function startEdit (task: Task) {
@@ -53,23 +101,31 @@ export default function TaskApp() {
     setEditingTitle(task.title);
   }
 
-  function saveEdit() {
-      if (!editingId) return;
+  async function saveEdit() {
+    if (!editingId) return;
 
-      const trimmed = editingTitle.trim();
-      if (!trimmed) {
-        setEditingId(null);
-        setEditingTitle("");
-        return;
-      }
-
-      const edited = tasks.map((task) => 
-        task.id === editingId ? { ...task, title: trimmed } : task
-      );
-
-      setTasks(edited);
+    const trimmed = editingTitle.trim();
+    if (!trimmed) {
       setEditingId(null);
       setEditingTitle("");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .update({ title: trimmed })
+      .eq('id', editingId)
+      .select()
+      .single();
+
+  if (error) {
+    console.error('Failed to update task:', error);
+    return; // keep UI in edit mode so user can retry/fix
+  }
+
+  setTasks(tasks.map(t => (t.id === editingId ? (data as Task) : t)));
+  setEditingId(null);
+  setEditingTitle("");
   };
 
   function cancelEdit() {
