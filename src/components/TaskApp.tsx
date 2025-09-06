@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Button from '@/components/Button';
+import { supabase } from '@/lib/supabaseClient';
+import { useEffect } from 'react';
 
   type Task = { 
     id: string; 
@@ -75,7 +77,23 @@ export default function TaskApp() {
     setEditingTitle("");
   };
 
- 
+  useEffect(() => {
+    async function loadTasks() {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error(error);
+      } else {
+        setTasks(data as Task[]);
+      }
+    }
+
+    loadTasks();
+  }, []);
+
   
   return (
     <section style={{ padding: 24, fontFamily: 'sans-serif' }}>
