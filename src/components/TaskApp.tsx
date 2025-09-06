@@ -51,13 +51,29 @@ export default function TaskApp() {
     setEditingTitle(task.title);
   }
 
-  function saveEdit (editingId: string) {
-    const edited = tasks.map((task) => {
-      if (editingId === null) {
-        return task;
-    }});
-    }
-  }
+  function saveEdit() {
+      if (!editingId) return;
+
+      const trimmed = editingTitle.trim();
+      if (!trimmed) {
+        setEditingId(null);
+        setEditingTitle("");
+        return;
+      }
+
+      const edited = tasks.map((task) => 
+        task.id === editingId ? { ...task, title: trimmed } : task
+      );
+
+      setTasks(edited);
+      setEditingId(null);
+      setEditingTitle("");
+  };
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditingTitle("");
+  };
 
  
   
@@ -109,34 +125,68 @@ export default function TaskApp() {
             }}
         >
             {editingId === task.id ? (
-              <input
-                value={editingTitle}
-                onChange={(e) => setEditingTitle(e.target.value)}
-                autoFocus
-              />
+              <form
+                onSubmit={(e) => {
+                    e.preventDefault(); // no page refresh
+                    saveEdit();
+                }}
+              >
+                <input 
+                  value={editingTitle}
+                  onChange={(e) => setEditingTitle(e.target.value)}
+                  autoFocus
+                />
+
+              </form>
             ) : (
               <label>{task.title}</label>
             )}
         </label>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-        <button 
-          onClick={() => startEdit(task)}
-          
-          style = {{
-            cursor: 'pointer'
-          }} 
 
-        >
-            Edit
-          </button>
-        <button 
-          onClick={() => deleteTask(task.id)}
-          style = {{
-            cursor: 'pointer'
-          }} 
-        >
-          Delete
-        </button>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+        
+        {editingId === task.id ? (
+          <>
+            <button 
+            onClick={saveEdit}
+            style = {{
+              cursor: 'pointer'
+            }}         
+            >
+              Save
+            </button>
+
+            <button 
+            onClick={cancelEdit}
+            style = {{
+              cursor: 'pointer'
+            }}         
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <button 
+              onClick={() => startEdit(task)}
+              
+              style = {{
+                cursor: 'pointer'
+              }} 
+            >
+                Edit
+              </button>
+
+            <button 
+              onClick={() => deleteTask(task.id)}
+              style = {{
+                cursor: 'pointer'
+              }} 
+            >
+              Delete
+            </button>          
+          </>
+        )}
         </div>
         </li>
     ))}
