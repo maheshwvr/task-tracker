@@ -9,6 +9,7 @@ import { useEffect } from 'react';
     id: string; 
     title: string; 
     completed: boolean; 
+    user_id: string;
 };
 
 export default function TaskApp() {
@@ -17,26 +18,24 @@ export default function TaskApp() {
   const [newTask, setNewTask] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
+  const [userId, setUserId] = useState<string | null>(null);
 
 
   async function addTask() {
     const title = newTask.trim();
-    if (!title) return;
+    if (!title || !userId) return;
 
-    // 1) insert into DB and return the row we created
     const { data, error } = await supabase
       .from('tasks')
-      .insert({ title, completed: false })
+      .insert({ title, completed: false, user_id: userId }) // include user_id
       .select()
       .single();
 
-    // 2) handle error
     if (error) {
       console.error('Failed to insert task:', error);
       return;
     }
 
-    // 3) update local state with the row returned by Supabase
     setTasks([...tasks, data as Task]);
     setNewTask('');
   }
@@ -134,10 +133,12 @@ export default function TaskApp() {
   };
 
   useEffect(() => {
-    async function loadTasks() {
+    if (!userId) return; // wait until we know the user
+    (async () => {
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
+        .eq('user_id', userId)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -145,10 +146,19 @@ export default function TaskApp() {
       } else {
         setTasks(data as Task[]);
       }
-    }
+    })();
+  }, [userId]);
 
-    loadTasks();
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!active) return;
+      setUserId(data.user?.id ?? null);
+    })();
+    return () => { active = false; };
   }, []);
+
 
   
   return (
