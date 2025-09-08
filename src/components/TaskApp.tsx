@@ -186,7 +186,7 @@ export default function TaskApp() {
               className="form-input"
               style={{ flex: 1 }}
           />
-          <Button label="Add Task" icon={<FaPlus />} size="large" />
+          <Button label="Add Task" icon={<FaPlus />} size="large" type="submit" />
         </div>
       </form>
 
