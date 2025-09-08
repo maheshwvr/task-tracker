@@ -1,26 +1,50 @@
 // src/components/Button.tsx
-// 1) A TypeScript `type` describing the inputs (props) our component accepts.
+// Enhanced Button component with size and variant support
 type ButtonProps = {
-label: string; // required string prop
-onClick?: () => void; // optional function prop (event handler)
+  label: string;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary';
+  size?: 'small' | 'medium' | 'large';
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
 };
 
+export default function Button({ 
+  label, 
+  onClick, 
+  variant = 'primary', 
+  size = 'medium',
+  type = 'button',
+  disabled = false 
+}: ButtonProps) {
+  const getClassName = () => {
+    let className = 'btn-base';
+    
+    // Add variant class
+    if (variant === 'primary') {
+      className += ' btn-primary';
+    } else {
+      className += ' btn-secondary';
+    }
+    
+    // Add size class
+    if (size === 'small') {
+      className += ' btn-small';
+    } else if (size === 'large') {
+      className += ' btn-large';
+    }
+    
+    return className;
+  };
 
-// 2) `export default` means: this is the main thing this file provides.
-// Other files can import it without curly braces.
-export default function Button({ label, onClick }: ButtonProps) {
-// 3) The function returns TSX (HTML-like syntax inside TypeScript)
-return (
-<button 
-    onClick={onClick} 
-    style={{ 
-        padding: "8px 12px", 
-        border: "1px solid #ffffffff", 
-        borderRadius: 6, 
-        cursor: 'pointer'
-        }}
->
-{label}
-</button>
-);
+  return (
+    <button 
+      onClick={onClick}
+      type={type}
+      disabled={disabled}
+      className={getClassName()}
+    >
+      {label}
+    </button>
+  );
 }

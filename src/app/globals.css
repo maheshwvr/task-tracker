@@ -1,26 +1,274 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Dark theme - Grey and Dark Blue */
+  --background: #000522;
+  --page-background: #00132e;
+  --foreground: #d8deff;
+  --primary: #1e3a8a;
+  --primary-hover: #1e40af;
+  --secondary: #1f2937;
+  --secondary-hover: #6395e0;
+  --accent: #3b82f6;
+  --border: #374151;
+  --muted: #6b7280;
 }
 
 body {
+  background: var(--page-background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Layout utilities */
+.app-container {
+  min-height: 100vh;
+  width: 100%;
+  padding: 0;
+  position: relative;
+}
+
+.content-wrapper {
+  width: 100%;
+  background: var(--page-background);
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.centered-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 450px;
+  background: var(--background);
+  padding: 3rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Typography hierarchy */
+.heading-primary {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: var(--foreground);
+  text-align: center;
+  font-family: var(--font-dancing-script), cursive;
+}
+
+.heading-secondary {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--foreground);
+}
+
+.text-muted {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* Button variants */
+.btn-base {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--secondary-hover);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+  transform: translateY(-1px);
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+/* Form styles */
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Task list styles */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--background);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.task-item:hover {
+  background: var(--secondary-hover);
+}
+
+.task-item:hover .task-label {
+  color: #2c2d35;
+}
+
+.task-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Custom circular checkbox */
+.custom-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-checkbox:hover {
+  border-color: var(--primary-hover);
+  transform: scale(1.1);
+}
+
+.custom-checkbox.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  animation: bounce 0.6s ease;
+}
+
+.custom-checkbox.checking {
+  animation: shrink-expand 0.6s ease;
+}
+
+.custom-checkbox::after {
+  content: '✓';
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s ease;
+}
+
+.custom-checkbox.checked::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Task label with strikethrough animation */
+.task-label {
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.task-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--foreground);
+  transition: width 0.4s ease;
+}
+
+.task-label.completed::after {
+  width: 100%;
+}
+
+.task-label.completed {
+  opacity: 0.6;
+}
+
+/* Animations */
+@keyframes bounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shrink-expand {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.8); }
+  100% { transform: scale(1); }
+}
+
+/* Footer styles */
+.page-footer {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 1rem 2rem;
+  z-index: 1000;
+}
+
+.footer-content {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-style: italic;
+  text-align: right;
 }

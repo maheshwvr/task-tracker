@@ -19,6 +19,7 @@ export default function TaskApp() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [animatingTask, setAnimatingTask] = useState<string | null>(null);
 
 
   async function addTask() {
@@ -48,14 +49,20 @@ export default function TaskApp() {
     // 2) Compute the new completed value
     const nextCompleted = !target.completed;
 
-    // 3) Optimistically update local UI
+    // 3) Start animation if completing task
+    if (nextCompleted) {
+      setAnimatingTask(id);
+      setTimeout(() => setAnimatingTask(null), 600); // Animation duration
+    }
+
+    // 4) Optimistically update local UI
     const prevTasks = tasks;
     const optimistic = tasks.map((t) =>
       t.id === id ? { ...t, completed: nextCompleted } : t
     );
     setTasks(optimistic);
 
-    // 4) Persist to Supabase
+    // 5) Persist to Supabase
     const { data, error } = await supabase
       .from('tasks')
       .update({ completed: nextCompleted })
@@ -63,14 +70,14 @@ export default function TaskApp() {
       .select()
       .single();
 
-    // 5) Handle errors (rollback UI if needed)
+    // 6) Handle errors (rollback UI if needed)
     if (error) {
       console.error('Failed to toggle task:', error);
       setTasks(prevTasks); // rollback
       return;
     }
 
-    // 6) (Optional) trust server as source of truth
+    // 7) (Optional) trust server as source of truth
     setTasks((cur) => cur.map((t) => (t.id === id ? (data as Task) : t)));
   }
 
@@ -162,117 +169,110 @@ export default function TaskApp() {
 
   
   return (
-    <section style={{ padding: 24, fontFamily: 'sans-serif' }}>
-      <h1>Task Tracker</h1>
-
-      <form
-        onSubmit={(e) => {
-            e.preventDefault(); // no page refresh
-            addTask();
-        }}
-      >
-        <input 
-            placeholder='Enter a task...'
-            value = {newTask}
-            onChange = {(e) => setNewTask(e.target.value)}
-        />
-
-        <Button label="Add Task" />
-      </form>
-
-    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-    {tasks.map((task) => (
-        <li
-          key={task.id}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '6px 0',
+    <div className="app-container">
+      <div className="content-wrapper">
+        <form
+          onSubmit={(e) => {
+              e.preventDefault();
+              addTask();
           }}
+          style={{ marginBottom: '2rem' }}
         >
-        <input
-            type="checkbox"
-            checked={task.completed}
-            onChange={() => toggleTask(task.id)}
-            aria-label={`Mark ${task.title} as ${task.completed ? 'incomplete' : 'complete'}`}
-            style = {{
-              cursor: 'pointer'
-            }} 
-        />
-        <label
-            onClick={() => toggleTask(task.id)}
-            style={{
-            textDecoration: task.completed ? 'line-through' : 'none',
-            cursor: 'pointer',
-            userSelect: 'none',
-            }}
-        >
-            {editingId === task.id ? (
-              <form
-                onSubmit={(e) => {
-                    e.preventDefault(); // no page refresh
-                    saveEdit();
-                }}
-              >
-                <input 
-                  value={editingTitle}
-                  onChange={(e) => setEditingTitle(e.target.value)}
-                  autoFocus
-                />
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <input 
+                placeholder='Enter a task...'
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+                className="form-input"
+                style={{ flex: 1 }}
+            />
+            <Button label="Add Task" size="large" />
+          </div>
+        </form>
 
-              </form>
-            ) : (
-              <label>{task.title}</label>
-            )}
-        </label>
-
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-        
-        {editingId === task.id ? (
-          <>
-            <button 
-            onClick={saveEdit}
-            style = {{
-              cursor: 'pointer'
-            }}         
-            >
-              Save
-            </button>
-
-            <button 
-            onClick={cancelEdit}
-            style = {{ cursor: 'pointer' }}
-            >
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <button 
-              onClick={() => startEdit(task)}
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {tasks.map((task) => (
+            <li key={task.id} className="task-item">
+              <div
+                className={`custom-checkbox ${task.completed ? 'checked' : ''} ${animatingTask === task.id ? 'checking' : ''}`}
+                onClick={() => toggleTask(task.id)}
+                aria-label={`Mark ${task.title} as ${task.completed ? 'incomplete' : 'complete'}`}
+                role="checkbox"
+                aria-checked={task.completed}
+              />
               
-              style = {{
-                cursor: 'pointer'
-              }} 
-            >
-                Edit
-              </button>
+              {editingId === task.id ? (
+                <form
+                  onSubmit={(e) => {
+                      e.preventDefault();
+                      saveEdit();
+                  }}
+                  style={{ flex: 1 }}
+                >
+                  <input 
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    className="form-input"
+                    autoFocus
+                  />
+                </form>
+              ) : (
+                <span
+                  className={`task-label ${task.completed ? 'completed' : ''}`}
+                  onClick={() => toggleTask(task.id)}
+                >
+                  {task.title}
+                </span>
+              )}
 
-            <button 
-              onClick={() => deleteTask(task.id)}
-              style = {{
-                cursor: 'pointer'
-              }} 
-            >
-              Delete
-            </button>          
-          </>
+              <div className="task-actions">
+                {editingId === task.id ? (
+                  <>
+                    <Button 
+                      label="Save"
+                      onClick={saveEdit}
+                      size="small"
+                      variant="primary"
+                    />
+                    <Button 
+                      label="Cancel"
+                      onClick={cancelEdit}
+                      size="small"
+                      variant="secondary"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      label="Edit"
+                      onClick={() => startEdit(task)}
+                      size="small"
+                      variant="secondary"
+                    />
+                    <Button 
+                      label="Delete"
+                      onClick={() => deleteTask(task.id)}
+                      size="small"
+                      variant="secondary"
+                    />          
+                  </>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        {tasks.length === 0 && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '3rem 1rem',
+            color: 'var(--muted)'
+          }}>
+            <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No tasks yet</p>
+            <p className="text-muted">Add your first task to get started</p>
+          </div>
         )}
-        </div>
-        </li>
-    ))}
-    </ul>
-    </section>
+      </div>
+    </div>
   );
 }

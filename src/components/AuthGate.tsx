@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import Button from '@/components/Button';
 import ResetPasswordPage from '@/app/auth/callback/page';
 
 type Props = { children: React.ReactNode };
@@ -61,55 +62,144 @@ export default function AuthGate({ children }: Props) {
 
   async function signOut() { await supabase.auth.signOut(); }
 
-  if (!sessionReady) return <p style={{ padding:24 }}>Loading…</p>;
+  if (!sessionReady) return (
+    <div className="app-container">
+      <div className="content-wrapper">
+        <p style={{ textAlign: 'center', fontSize: '1.1rem' }}>Loading…</p>
+      </div>
+    </div>
+  );
 
   if (!isAuthed) {
     return (
-      <section style={{ padding:24, maxWidth:420 }}>
-        <h1>Task Tracker</h1>
+      <div className="app-container">
+        <div className="content-wrapper centered-auth">
+          <div className="auth-form-container">
+            <h1 className="heading-primary">Be Productive.</h1>
 
-        {/* Mode switch */}
-        <div style={{ display:'flex', gap:8, margin:'8px 0' }}>
-          <button onClick={() => setMode('signin')} disabled={mode==='signin'} style = {{ cursor: 'pointer' }}>Sign in</button>
-          <button onClick={() => setMode('signup')} disabled={mode==='signup'} style = {{ cursor: 'pointer' }}>Sign up</button>  
-          <button onClick={handleResetPassword} style={{ cursor: 'pointer' }}>Reset password</button>                
+          {/* Mode switch */}
+          <div style={{ display:'flex', gap:'0.5rem', margin:'1.5rem 0', justifyContent: 'center' }}>
+            <Button 
+              label="Sign in" 
+              onClick={() => setMode('signin')} 
+              variant={mode === 'signin' ? 'primary' : 'secondary'}
+              size="small"
+            />
+            <Button 
+              label="Sign up" 
+              onClick={() => setMode('signup')} 
+              variant={mode === 'signup' ? 'primary' : 'secondary'}
+              size="small"
+            />
+          </div>
+
+          {/* Email/password form */}
+          <form onSubmit={mode==='signin' ? handleSignIn : handleSignUp}
+                style={{ display:'grid', gap:'1rem', marginBottom: '1rem' }}>
+            <input 
+              type="email" 
+              placeholder="you@example.com"
+              value={email} 
+              onChange={e=>setEmail(e.target.value)} 
+              required 
+              className="form-input"
+            />
+            <input 
+              type="password" 
+              placeholder="Password"
+              value={password} 
+              onChange={e=>setPassword(e.target.value)} 
+              required 
+              className="form-input"
+            />
+            <Button 
+              label={sending ? 'Working…' : mode==='signin' ? 'Sign in' : 'Create account'}
+              disabled={sending} 
+              type="submit"
+              size="large"
+            />
+          </form>
+
+          {/* Additional options */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+            <Button 
+              label="Reset password"
+              onClick={handleResetPassword}
+              variant="secondary"
+              size="small"
+            />
+            
+            <form onSubmit={async e => {
+              e.preventDefault(); setSending(true); setMsg(null);
+              const { error } = await supabase.auth.signInWithOtp({
+                email, options:{ emailRedirectTo: window.location.origin }
+              });
+              setSending(false); setMsg(error ? `Error: ${error.message}` : 'Magic link sent!');
+            }}>
+              <Button 
+                label="Send magic link instead"
+                type="submit"
+                variant="secondary"
+                size="small"
+              />
+            </form>
+          </div>
+
+          {msg && (
+            <div style={{ 
+              marginTop:'1.5rem', 
+              padding: '1rem',
+              backgroundColor: 'var(--background)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              {msg}
+            </div>
+          )}
+          </div>
         </div>
-
-        {/* Email/password form */}
-        <form onSubmit={mode==='signin' ? handleSignIn : handleSignUp}
-              style={{ display:'grid', gap:8 }}>
-          <input type="email" placeholder="you@example.com"
-                 value={email} onChange={e=>setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password"
-                 value={password} onChange={e=>setPassword(e.target.value)} required />
-          <button disabled={sending} type="submit" style = {{ cursor: 'pointer' }}>
-            {sending ? 'Working…' : mode==='signin' ? 'Sign in' : 'Create account'}
-          </button>
-        </form>
-
-        {/* Optional: magic link button can coexist */}
-        <form onSubmit={async e => {
-          e.preventDefault(); setSending(true); setMsg(null);
-          const { error } = await supabase.auth.signInWithOtp({
-            email, options:{ emailRedirectTo: window.location.origin }
-          });
-          setSending(false); setMsg(error ? `Error: ${error.message}` : 'Magic link sent!');
-        }} style={{ marginTop:8 }}>
-          <button type="submit" style = {{ cursor: 'pointer' }}>Send magic link instead</button>
-        </form>
-
-        {msg && <p style={{ marginTop:8 }}>{msg}</p>}
-      </section>
+        
+        {/* Footer */}
+        <footer className="page-footer">
+          <div className="footer-content">
+            Be Productive. A task tracker by Mahesh Maniam.
+          </div>
+        </footer>
+      </div>
     );
   }
 
   return (
     <div>
-      <header style={{ display:'flex', justifyContent:'space-between', padding:16 }}>
-        <strong>Task Tracker</strong>
-        <button onClick={signOut} style = {{ cursor: 'pointer' }}>Sign out</button>
+      <header style={{ 
+        display:'flex', 
+        justifyContent:'space-between', 
+        alignItems: 'center',
+        padding:'1rem 2rem',
+        backgroundColor: 'var(--secondary)',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        <h2 className="heading-secondary" style={{ 
+          margin: 0, 
+          fontFamily: 'var(--font-dancing-script), cursive',
+          fontSize: '2rem'
+        }}>Be Productive.</h2>
+        <Button 
+          label="Sign out"
+          onClick={signOut}
+          variant="secondary"
+          size="small"
+        />
       </header>
       {children}
+      
+      {/* Footer */}
+      <footer className="page-footer">
+        <div className="footer-content">
+          Be Productive. A task tracker by Mahesh Maniam.
+        </div>
+      </footer>
     </div>
   );
 }
