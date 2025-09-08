@@ -1,9 +1,12 @@
 // src/components/Button.tsx
 // Enhanced Button component with size and variant support
+import { ReactNode } from 'react';
+
 type ButtonProps = {
-  label: string;
+  label?: string;
+  icon?: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'danger';
   size?: 'small' | 'medium' | 'large';
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
@@ -11,6 +14,7 @@ type ButtonProps = {
 
 export default function Button({ 
   label, 
+  icon,
   onClick, 
   variant = 'primary', 
   size = 'medium',
@@ -23,6 +27,8 @@ export default function Button({
     // Add variant class
     if (variant === 'primary') {
       className += ' btn-primary';
+    } else if (variant === 'danger') {
+      className += ' btn-danger';
     } else {
       className += ' btn-secondary';
     }
@@ -44,7 +50,10 @@ export default function Button({
       disabled={disabled}
       className={getClassName()}
     >
-      {label}
+      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {icon && <span>{icon}</span>}
+        {label && <span>{label}</span>}
+      </span>
     </button>
   );
 }

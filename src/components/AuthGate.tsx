@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Button from '@/components/Button';
+import { FaUser } from 'react-icons/fa';
 
 type Props = { children: React.ReactNode };
 
@@ -184,6 +185,7 @@ export default function AuthGate({ children }: Props) {
         }}>Be Productive.</h2>
         <Button 
           label="Sign out"
+          icon={<FaUser />}
           onClick={signOut}
           variant="secondary"
           size="small"

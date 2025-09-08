@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Button from '@/components/Button';
 import { supabase } from '@/lib/supabaseClient';
 import { useEffect } from 'react';
+import { FaEdit, FaTrash, FaPlus, FaSave, FaTimes } from 'react-icons/fa';
 
   type Task = { 
     id: string; 
@@ -52,7 +53,7 @@ export default function TaskApp() {
     // 3) Start animation if completing task
     if (nextCompleted) {
       setAnimatingTask(id);
-      setTimeout(() => setAnimatingTask(null), 600); // Animation duration
+      setTimeout(() => setAnimatingTask(null), 800); // Animation duration
     }
 
     // 4) Optimistically update local UI
@@ -185,7 +186,7 @@ export default function TaskApp() {
               className="form-input"
               style={{ flex: 1 }}
           />
-          <Button label="Add Task" size="large" />
+          <Button label="Add Task" icon={<FaPlus />} size="large" />
         </div>
       </form>
 
@@ -228,31 +229,31 @@ export default function TaskApp() {
                 {editingId === task.id ? (
                   <>
                     <Button 
-                      label="Save"
+                      icon={<FaSave />}
                       onClick={saveEdit}
                       size="small"
                       variant="primary"
                     />
                     <Button 
-                      label="Cancel"
+                      icon={<FaTimes />}
                       onClick={cancelEdit}
                       size="small"
-                      variant="secondary"
+                      variant="danger"
                     />
                   </>
                 ) : (
                   <>
                     <Button 
-                      label="Edit"
+                      icon={<FaEdit />}
                       onClick={() => startEdit(task)}
                       size="small"
                       variant="secondary"
                     />
                     <Button 
-                      label="Delete"
+                      icon={<FaTrash />}
                       onClick={() => deleteTask(task.id)}
                       size="small"
-                      variant="secondary"
+                      variant="danger"
                     />          
                   </>
                 )}
