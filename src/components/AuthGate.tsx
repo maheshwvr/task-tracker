@@ -52,8 +52,9 @@ export default function AuthGate({ children }: Props) {
     if (e) e.preventDefault();
     setSending(true);
     setMsg(null);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${siteUrl}/auth/callback`,
     });
     setSending(false);
     setMsg(error ? `Error: ${error.message}` : 'Password reset email sent. Check your inbox.');
@@ -131,8 +132,9 @@ export default function AuthGate({ children }: Props) {
             
             <form onSubmit={async e => {
               e.preventDefault(); setSending(true); setMsg(null);
+              const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
               const { error } = await supabase.auth.signInWithOtp({
-                email, options:{ emailRedirectTo: window.location.origin }
+                email, options:{ emailRedirectTo: siteUrl }
               });
               setSending(false); setMsg(error ? `Error: ${error.message}` : 'Magic link sent!');
             }}>
