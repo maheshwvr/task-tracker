@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Button from '@/components/Button';
-import ResetPasswordPage from '@/app/auth/callback/page';
 
 type Props = { children: React.ReactNode };
 
