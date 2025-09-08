@@ -72,7 +72,7 @@ export default function AuthGate({ children }: Props) {
   if (!isAuthed) {
     return (
       <div className="app-container">
-        <div className="content-wrapper centered-auth">
+        <main className="content-wrapper centered-auth">
           <div className="auth-form-container">
             <h1 className="heading-primary">Be Productive.</h1>
 
@@ -157,7 +157,7 @@ export default function AuthGate({ children }: Props) {
             </div>
           )}
           </div>
-        </div>
+        </main>
         
         {/* Footer */}
         <footer className="page-footer">
@@ -170,14 +170,12 @@ export default function AuthGate({ children }: Props) {
   }
 
   return (
-    <div>
-      <header style={{ 
+    <div className="app-container">
+      <header className="sticky-header" style={{ 
         display:'flex', 
         justifyContent:'space-between', 
         alignItems: 'center',
-        padding:'1rem 2rem',
-        backgroundColor: 'var(--secondary)',
-        borderBottom: '1px solid var(--border)'
+        padding:'1rem 2rem'
       }}>
         <h2 className="heading-secondary" style={{ 
           margin: 0, 
@@ -191,7 +189,10 @@ export default function AuthGate({ children }: Props) {
           size="small"
         />
       </header>
-      {children}
+      
+      <main style={{ flex: 1 }}>
+        {children}
+      </main>
       
       {/* Footer */}
       <footer className="page-footer">

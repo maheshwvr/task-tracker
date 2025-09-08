@@ -31,20 +31,21 @@ body {
   width: 100%;
   padding: 0;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .content-wrapper {
   width: 100%;
   background: var(--page-background);
   padding: 2rem;
-  min-height: 100vh;
 }
 
 .centered-auth {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  flex: 1;
   padding: 2rem;
 }
 
@@ -257,18 +258,27 @@ body {
   100% { transform: scale(1); }
 }
 
+/* Header styles */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--secondary);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Footer styles */
 .page-footer {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  padding: 1rem 2rem;
-  z-index: 1000;
+  background: var(--background);
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+  padding: 2rem;
+  text-align: center;
 }
 
 .footer-content {
   color: var(--muted);
   font-size: 0.875rem;
   font-style: italic;
-  text-align: right;
 }

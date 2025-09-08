@@ -169,26 +169,25 @@ export default function TaskApp() {
 
   
   return (
-    <div className="app-container">
-      <div className="content-wrapper">
-        <form
-          onSubmit={(e) => {
-              e.preventDefault();
-              addTask();
-          }}
-          style={{ marginBottom: '2rem' }}
-        >
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <input 
-                placeholder='Enter a task...'
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                className="form-input"
-                style={{ flex: 1 }}
-            />
-            <Button label="Add Task" size="large" />
-          </div>
-        </form>
+    <div className="content-wrapper">
+      <form
+        onSubmit={(e) => {
+            e.preventDefault();
+            addTask();
+        }}
+        style={{ marginBottom: '2rem' }}
+      >
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <input 
+              placeholder='Enter a task...'
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              className="form-input"
+              style={{ flex: 1 }}
+          />
+          <Button label="Add Task" size="large" />
+        </div>
+      </form>
 
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {tasks.map((task) => (
@@ -272,7 +271,6 @@ export default function TaskApp() {
             <p className="text-muted">Add your first task to get started</p>
           </div>
         )}
-      </div>
     </div>
   );
 }
