@@ -242,9 +242,7 @@ export default function TaskApp() {
 
             <button 
             onClick={cancelEdit}
-            style = {{
-              cursor: 'pointer'
-            }}         
+            style = {{ cursor: 'pointer' }}
             >
               Cancel
             </button>
